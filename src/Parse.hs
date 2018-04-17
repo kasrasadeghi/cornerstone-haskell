@@ -18,20 +18,22 @@ parse filename = do
 
 pProgram :: String -> String -> Texp
 pProgram filename str =
-    let (texps, rest) = many (pTexp . pWhitespace) (\s -> s == "" || head s == ')') [] str in 
+    let (texps, rest) = many (pTexp . pWhitespace) (\s -> s == "" || head s == ')') str in 
     Texp filename texps -- assert rest == ""
 
-many :: Parser Texp -> (String -> Bool) -> [Texp] -> Parser [Texp]
-many parse until acc str =
-    if until str then
-        (acc, str)
-    else let (texp, rest) = parse str in
-         many parse until (acc ++ [texp]) rest
+many :: Parser Texp -> (String -> Bool) -> Parser [Texp]
+many parse until str =
+    let loop parse until str acc = 
+            if until str then (acc, str)
+            else
+                let (texp, rest) = parse str in
+                loop parse until rest (acc ++ [texp])
+    in loop parse until str []
 
 pTexp :: Parser Texp
 pTexp str = if head str == '(' then pList (tail str) else pAtom str
 
-splitAtFirst :: (Char -> Bool) -> String -> (String, String)
+splitAtFirst :: (Char -> Bool) -> Parser String
 splitAtFirst pred str = case findIndex pred str of
                           Nothing -> ([], str)
                           Just i -> (take i str, drop i str)
@@ -51,12 +53,12 @@ pString str = let (string, rest) = splitAtFirst (\c -> c == '\"') str in ("\"" +
  -- splitAtFirst (\c -> c == '\"') str >>> second tail
 
 pWord :: Parser String
-pWord str = splitAtFirst (\c -> c == '(' || c == ')' || isSpace c) str
+pWord = splitAtFirst (\c -> c == '(' || c == ')' || isSpace c)
                                    
 pList :: Parser Texp
 pList str = -- TODO assertions
     let (value, afterValue) = pWord str in
-    let (texps, rest) = many (pTexp . pWhitespace) (\s -> head s == ')' || s == "") [] afterValue in 
+    let (texps, rest) = many (pTexp . pWhitespace) (\s -> head s == ')' || s == "") afterValue in 
     (Texp value texps, tail rest) -- drop the ')'
 
 pWhitespace :: String -> String
