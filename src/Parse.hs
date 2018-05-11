@@ -7,8 +7,16 @@ type Parser a = String -> (a, String)
     
 data Texp = Texp String [Texp]
 instance Show Texp where
-    show (Texp value [])  = value
-    show (Texp value arr) = "(" ++ value ++ " " ++ (unwords (filter (not . all isSpace) $ map show arr)) ++ ")"
+    show texp = tail $ showTexp 0 texp
+--    show (Texp value [])  = value
+--    show (Texp value arr) = "(" ++ value ++ " " ++ (unwords (filter (not . all isSpace) $ map show arr)) ++ ")"
+
+duplicate string n = concat $ replicate n string
+newline i string = duplicate "  " i
+
+showTexp :: Int -> Texp -> String
+showTexp i (Texp value [])  = "\n" ++ (duplicate "  " i) ++ value
+showTexp i (Texp value arr) = "\n" ++ (duplicate "  " i) ++ value ++ (concat $ map (showTexp (succ i)) arr)
 
 parse :: String -> IO Texp
 parse filename = do
