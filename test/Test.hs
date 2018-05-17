@@ -10,17 +10,7 @@ import Pass
 enterTestDir = do
   setCurrentDirectory "C:/Users/Kasra/Projects/cornerstone-tests/tests/blockify"
     
-main = do  
-  args <- getArgs
-  wd <- getCurrentDirectory
-  putStrLn wd
-  enterTestDir
-  let filename = case args of
-                   [] -> "string.bb"
-                   [x] -> x
-                   x:xs -> x
-  result <- parse filename
-  putStrLn $ show result
+main = tBlockify
            
 tParse = do
   enterTestDir
