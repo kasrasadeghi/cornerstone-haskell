@@ -6,11 +6,12 @@ import System.Process
 
 import Parse
 import Pass
+import Texp
 
 enterTestDir = do
-  setCurrentDirectory "C:/Users/Kasra/Projects/cornerstone-tests/tests/blockify"
+  setCurrentDirectory "/home/kasra/projects/cornerstone-tests/tests/blockify"
     
-main = do  
+main' = do  
   args <- getArgs
   wd <- getCurrentDirectory
   putStrLn wd
@@ -21,15 +22,15 @@ main = do
                    x:xs -> x
   result <- parse filename
   putStrLn $ show result
-           
-tParse = do
-  enterTestDir
-  result <- parse "argcall.bb"
-  putStrLn $ show result
 
-tBlockify = do
+main = do  
+  args <- getArgs
+  wd <- getCurrentDirectory
+  putStrLn wd
   enterTestDir
-  result <- parse "argcall.bb"
-  putStrLn $ show $ blockify result
-  expected <- readProcess "cat" ["argcall.ok"] ""
-  putStr expected
+  let filename = case args of
+                   [] -> "argcall.ok"
+                   [x] -> x
+                   x:xs -> x
+  result <- readFile filename
+  putStrLn $ (show . unshow) result

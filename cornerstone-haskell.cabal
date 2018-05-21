@@ -1,48 +1,40 @@
-name:                cornerstone-haskell
-version:             0.1.0.0
+name:               cornerstone-haskell
+version:            0.1.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/githubuser/cornerstone-haskell#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2018 Author name here
-category:            Web
-build-type:          Simple
-cabal-version:       >=1.10
-extra-source-files:  README.md
+homepage:           https://github.com/kasrasadeghi/cornerstone-haskell#readme
+license:            BSD3
+license-file:       LICENSE
+author:             Kasra Sadeghi
+maintainer:         kasra.sadeghi1@gmail.com
+copyright:          2018 Kasra Sadeghi
+category:           Compilers
+build-type:         Simple
+cabal-version:      >=1.10
+extra-source-files: README.md
 
 library
   hs-source-dirs:   src
   default-language: Haskell2010
   exposed-modules:  Parse, 
-                    Pass
-  build-depends:    base >= 4.7 && < 5,
-                    directory,
-                    text,
-                    process
-                                            
-executable Main
-  hs-source-dirs:   src
-  main-is:          Main.hs
-  default-language: Haskell2010
-  build-depends:    base >= 4.7 && < 5,
-                    directory,
-                    text,
-                    process
-  other-modules:    Parse,
-                    Pass
+                    Pass,
+                    Texp
+  build-depends:    base >= 4.7 && < 5, directory, text, process
 
 test-suite lib-test
   type:             exitcode-stdio-1.0
   hs-source-dirs:   test, src
   main-is:          Test.hs
-  build-depends:    base >= 4.7 && < 5,
-                    directory,
-                    text,
-                    process
   ghc-options:      -threaded -rtsopts -with-rtsopts=-N
   default-language: Haskell2010
-  other-modules:    Parse,
-                    Pass
+  build-depends:    base >= 4.7 && < 5, directory, text, process
+  other-modules:    Parse, Pass, Texp
+                                                                
+executable cornerstone
+  hs-source-dirs:   src
+  main-is:          Main.hs
+  ghc-options:      -threaded -rtsopts -with-rtsopts=-N
+  default-language: Haskell2010
+  build-depends:    base >= 4.7 && < 5, directory, text, process
+  other-modules:    Parse, Pass, Texp
+
