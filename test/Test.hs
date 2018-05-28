@@ -14,21 +14,22 @@ import Texp
     
 data OK = OK deriving (Eq, Show)
 data Err = Err String deriving (Eq, Show)
-    
+         
 main = do
   testBlockify
   testUnshow
 
+testCheck results tests = do
+  if all (== Right OK) results then putStrLn "passed all tests"
+  else print $ filter ((/= Right OK).fst) $ zip results tests
+  
 testBlockify = do  
   putStrLn "\ntesting blockify"
   tests <- listTests "blockify"
   results <- forM tests $ \tn -> do
                putStrLn $ " - testing: " ++ tn
                tBlockify tn
-  
-  if all (== Right OK) results then putStrLn "passed all tests"
-  else -- putStrLn $ map snd $ filter ((/= Nothing) . fst) $ zip results tests
-       print $ filter ((/= Right OK).fst) $ zip results tests
+  testCheck results tests  
 
 testUnshow = do
   putStrLn "\ntesting unshow"
@@ -38,9 +39,7 @@ testUnshow = do
   results <- forM tests $ \tn -> do
                putStrLn $ " - testing: " ++ tn
                tUnshow tn
-  if all (== Right OK) results then putStrLn "passed all tests"
-  else -- putStrLn $ map snd $ filter ((/= Nothing) . fst) $ zip results tests
-       print $ filter ((/= Right OK).fst) $ zip results tests
+  testCheck results tests
        
 ------ test util ---------------------------------
       
@@ -77,15 +76,20 @@ tUnshow testname = do -- testname == "argcall"
 
 reportEqErr :: Texp -> Texp -> Err
 reportEqErr result expected = Err (show result ++ "\n" ++ show expected)
+
+tBlockify = tPass blockify
                               
-tBlockify :: String -> IO (Either Err OK)
-tBlockify testname = do -- testname == "argcall"
+tPass :: (Texp -> Texp) -> String -> IO (Either Err OK)
+tPass f testname = do -- testname == "argcall"
   enterTestDir "blockify"
   let filename = testname ++ ".bb"
   src <- readFile filename
   let texp = pProgram filename src
-  let result = blockify texp
+  let result = f texp
   expected' <- readFile $ testname ++ ".ok"
   let expected = unshow expected'
   if (expected == result) then return $ Right OK
   else                         return $ Left $ reportEqErr result expected
+
+
+-- (+ 1 2)
