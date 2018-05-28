@@ -3,6 +3,8 @@ module Texp where
 import Parse
 import Data.Char
 
+-- data Texp = Texp String [Texp]
+    
 instance Show Texp where
     show texp = tail $ treeTexp texp
 
@@ -21,3 +23,13 @@ treeTexp' i (Texp value arr) = "\n" ++ (duplicate "  " i) ++ value ++ (concat $ 
 parenTexp :: Texp -> String
 parenTexp (Texp value [])  = value
 parenTexp (Texp value arr) = "(" ++ value ++ " " ++ (unwords (filter (not . all isSpace) $ map show arr)) ++ ")"
+
+-- eq
+
+instance Eq Texp where
+    (==) (Texp va ca) (Texp vb cb) =
+          (va == vb) && (foldr (&&) True $ map (\(a,b) -> a == b) $ zip ca cb)
+
+
+                     
+-- eq with error reporting
