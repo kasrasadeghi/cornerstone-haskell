@@ -3,7 +3,7 @@ module Parse where
 import Data.Char
 import Data.List
 import Control.Arrow
-
+import Control.Monad
 
 data Texp = Texp String [Texp]
 type Parser a = String -> (a, String)
@@ -20,21 +20,13 @@ many parse until str =
                 loop parse until rest (acc ++ [x])
     in loop parse until str []
 
-char :: Char -> Parser (Maybe Char)
-char c ""     = (Nothing, "")
-char c (x:xs) = if x == c then (Just x, xs) else (Nothing, x:xs)
-
-char' :: Char -> Parser String
-char' c ""     = ("", "")
-char' c (x:xs) = if x == c then ([x], xs) else ("", x:xs)
+char :: Char -> Parser String
+char c ""     = ("", "")
+char c (x:xs) = if x == c then ([x], xs) else ("", x:xs)
 
 -- TODO Maybe Monad bind?
-andThen :: Parser (Maybe Char) -> Parser (Maybe Char) -> Parser String
-andThen f g s = case f s of
-              (Nothing, s) -> ("", s)
-              (Just fc, t) -> case g t of
-                                (Nothing, t) -> ("", s)
-                                (Just gc, t') -> ([fc, gc], t')
+andThen :: Parser String -> Parser String -> Parser String
+andThen f g = f >=> g
 
 -- TODO
 -- string :: String -> Parser String
