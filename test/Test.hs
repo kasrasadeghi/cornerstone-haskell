@@ -1,4 +1,4 @@
-module Main where
+module Test where
 
 import System.Environment
 import System.Directory
@@ -17,9 +17,10 @@ import TestUtil
 data OK = OK deriving (Eq, Show)
 data Err = Err String deriving (Eq, Show)
          
-main = do
-  testBlockify
-  testUnshow
+test = do
+  -- testBlockify
+  -- testUnshow
+  testBecomeify
 
 testBecomeify = do
   putStrLn "\ntesting becomeify"
@@ -97,7 +98,8 @@ tUnshow testname = do -- testname == "argcall"
   else return $ Left "show . unshow is not the identity after showing a texp"
 
 reportEqErr :: Texp -> Texp -> Err
-reportEqErr expected result = Err . show $ zipConcat (lines ("expected:\n" ++ show expected)) (lines ("result:\n" ++ show result))
+reportEqErr expected result = Err . unlines $  zipConcat (lines ("expected:\n" ++ show expected)) (lines ("result:\n" ++ show result))
+-- reportEqErr expected result = Err (show expected ++ "\n" ++ show result)
 
 tBlockify = tPass blockify "blockify"
 tBecomeify = tPass (becomeify . blockify) "become"
