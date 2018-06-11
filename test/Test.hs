@@ -21,6 +21,15 @@ test = do
   -- testBlockify
   -- testUnshow
   testBecomeify
+  testBecomeify'
+
+testBecomeify' = do
+  putStrLn "\ntesting becomeify'"
+  tests <- listTests "become"
+  results <- forM tests $ \tn -> do
+               putStrLn $ " - testing: " ++ tn
+               tBecomeify' tn
+  testCheck results tests
 
 testBecomeify = do
   putStrLn "\ntesting becomeify"
@@ -103,6 +112,7 @@ reportEqErr expected result = Err . unlines $  zipConcat (lines ("expected:\n" +
 
 tBlockify = tPass blockify "blockify"
 tBecomeify = tPass (becomeify . blockify) "become"
+tBecomeify' = tPass (flattenDo . becomeify' . blockify) "become"
                               
 tPass :: (Texp -> Texp) -> String -> String -> IO (Either Err OK)
 tPass f testDir testname = do -- testDir == "blockify", testname == "argcall"
@@ -115,4 +125,3 @@ tPass f testDir testname = do -- testDir == "blockify", testname == "argcall"
   let expected = unshow expected'
   if (expected == result) then return $ Right OK
   else                         return $ Left $ reportEqErr expected result
-

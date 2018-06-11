@@ -69,7 +69,7 @@ becomeify' (Texp value tls) =
 
 -- toplevel
 becomeifyTL' tl = case tl of
-                   Texp "def" [a, b, c, (Texp "do" stmts)] -> Texp "def" [a, b, c, (Texp "do" (map becomeifyStmt stmts))]
+                   Texp "def" [a, b, c, (Texp "do" stmts)] -> Texp "def" [a, b, c, (Texp "do" (map becomeifyStmt' stmts))]
                    _ -> tl
 
 becomeifyStmt' stmt = case stmt of
