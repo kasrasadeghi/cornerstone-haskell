@@ -11,6 +11,8 @@ import Data.List
 import Parse
 import Pass
 import Texp
+
+import TestUtil
     
 data OK = OK deriving (Eq, Show)
 data Err = Err String deriving (Eq, Show)
@@ -19,9 +21,13 @@ main = do
   testBlockify
   testUnshow
 
-testCheck results tests = do
-  if all (== Right OK) results then putStrLn "passed all tests"
-  else print $ filter ((/= Right OK).fst) $ zip results tests
+testBecomeify = do
+  putStrLn "\ntesting becomeify"
+  tests <- listTests "become"
+  results <- forM tests $ \tn -> do
+               putStrLn $ " - testing: " ++ tn
+               tBecomeify tn
+  testCheck results tests
   
 testBlockify = do  
   putStrLn "\ntesting blockify"
@@ -39,12 +45,28 @@ testUnshow = do
   results <- forM tests $ \tn -> do
                putStrLn $ " - testing: " ++ tn
                tUnshow tn
-  testCheck results tests
+  if all (== Right OK) results then putStrLn "passed all tests"
+  else print $ map snd $ filter ((/= Right OK).fst) $ zip results tests  
        
 ------ test util ---------------------------------
       
 testDir = if os == "linux" then "/home/kasra/projects/cornerstone-tests/tests/"
           else                  "C:/Users/Kasra/Projects/cornerstone-tests/tests/"
+
+resultPrint :: Either Err OK -> IO ()
+resultPrint result = do
+  case result of
+    Left (Err s) -> putStrLn s
+    Right OK -> print "OK"
+
+testCheck :: [Either Err OK] -> [String] -> IO ()
+testCheck results tests = do
+  forM_ (zip results tests) $ \(result, testname) -> do
+    putStrLn ""
+    putStrLn testname
+    resultPrint result
+  -- if all (== Right OK) results then putStrLn "passed all tests"
+  -- else print $ map snd $ filter ((/= Right OK).fst) $ zip results tests
 
 enterTestDir subdir = do
   setCurrentDirectory $ (testDir ++ subdir)
@@ -75,13 +97,14 @@ tUnshow testname = do -- testname == "argcall"
   else return $ Left "show . unshow is not the identity after showing a texp"
 
 reportEqErr :: Texp -> Texp -> Err
-reportEqErr result expected = Err (show result ++ "\n" ++ show expected)
+reportEqErr expected result = Err . show $ zipConcat (lines ("expected:\n" ++ show expected)) (lines ("result:\n" ++ show result))
 
-tBlockify = tPass blockify
+tBlockify = tPass blockify "blockify"
+tBecomeify = tPass (becomeify . blockify) "become"
                               
-tPass :: (Texp -> Texp) -> String -> IO (Either Err OK)
-tPass f testname = do -- testname == "argcall"
-  enterTestDir "blockify"
+tPass :: (Texp -> Texp) -> String -> String -> IO (Either Err OK)
+tPass f testDir testname = do -- testDir == "blockify", testname == "argcall"
+  enterTestDir testDir
   let filename = testname ++ ".bb"
   src <- readFile filename
   let texp = pProgram filename src
@@ -89,7 +112,5 @@ tPass f testname = do -- testname == "argcall"
   expected' <- readFile $ testname ++ ".ok"
   let expected = unshow expected'
   if (expected == result) then return $ Right OK
-  else                         return $ Left $ reportEqErr result expected
+  else                         return $ Left $ reportEqErr expected result
 
-
--- (+ 1 2)

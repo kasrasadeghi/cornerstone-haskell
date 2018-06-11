@@ -3,7 +3,7 @@ version:            0.1.0.0
 -- synopsis:
 -- description:
 homepage:           https://github.com/kasrasadeghi/cornerstone-haskell#readme
-license:            BSD3
+license:            MIT
 license-file:       LICENSE
 author:             Kasra Sadeghi
 maintainer:         kasra.sadeghi1@gmail.com
@@ -20,15 +20,6 @@ library
                     Pass,
                     Texp
   build-depends:    base >= 4.7 && < 5, directory, text, process
-
-test-suite lib-test
-  type:             exitcode-stdio-1.0
-  hs-source-dirs:   test, src
-  main-is:          Test.hs
-  ghc-options:      -threaded -rtsopts -with-rtsopts=-N
-  default-language: Haskell2010
-  build-depends:    base >= 4.7 && < 5, directory, text, process
-  other-modules:    Parse, Pass, Texp
                                                                 
 executable cornerstone
   hs-source-dirs:   src
@@ -38,3 +29,11 @@ executable cornerstone
   build-depends:    base >= 4.7 && < 5, directory, text, process
   other-modules:    Parse, Pass, Texp
 
+test-suite lib-test
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   test, src
+  main-is:          Test.hs
+  ghc-options:      -threaded -rtsopts -with-rtsopts=-N
+  default-language: Haskell2010
+  build-depends:    base >= 4.7 && < 5, directory, text, process
+  other-modules:    Parse, Pass, Texp, TestUtil
