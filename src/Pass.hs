@@ -23,41 +23,41 @@ blockify = blockifyDef . blockifyIf
 
 -- prog
 blockifyDef (Texp value tls) =
-  Texp value $ (flip map) tls blockifyDefTL
+  Texp value $ map blockifyDefTL tls
 
 -- toplevel
 blockifyDefTL tl = case tl of
-          {- def -}  Texp "def" (a:b:c:rest) -> Texp "def" (a:b:c:[(Texp "do" rest)])
+          {- def -}  Texp "def" (a:b:c:rest) -> Texp "def" (a:b:c:[Texp "do" rest])
                      _ -> tl
 
 -- prog
 blockifyIf (Texp value tls) =
-  Texp value $ (flip map) tls blockifyIfTL
+  Texp value $ map blockifyIfTL tls
 
 -- toplevel
 blockifyIfTL tl = case tl of
-         {- def -}  Texp "def" (a:b:c:rest) -> Texp "def" (a:b:c:(map blockifyIfStmt rest))
+         {- def -}  Texp "def" (a:b:c:rest) -> Texp "def" (a:b:c:map blockifyIfStmt rest)
                     _ -> tl
 
 -- stmt
 blockifyIfStmt stmt = case stmt of
-         {- if-stmt -}  (Texp "if" (cond:stmts)) -> (Texp "if" (cond:[Texp "do" (map blockifyIfStmt stmts)]))
-         {- do-stmt -}  (Texp "do" stmts) -> (Texp "do" (map blockifyIfStmt stmts))
+         {- if-stmt -}  Texp "if" (cond:stmts) -> Texp "if" (cond:[Texp "do" (map blockifyIfStmt stmts)])
+         {- do-stmt -}  Texp "do" stmts -> Texp "do" (map blockifyIfStmt stmts)
                         _ -> stmt
                                                        
 --------------------- BECOMEIFY -----------------------
 
 -- prog
 becomeify (Texp value tls) =
-  Texp value $ (flip map) tls becomeifyTL
+  Texp value $ map becomeifyTL tls
 
 -- toplevel
 becomeifyTL tl = case tl of
-                   Texp "def" [a, b, c, (Texp "do" stmts)] -> Texp "def" [a, b, c, (Texp "do" (concatMap becomeifyStmt stmts))]
+                   Texp "def" [a, b, c, Texp "do" stmts] -> Texp "def" [a, b, c, Texp "do" (concatMap becomeifyStmt stmts)]
                    _ -> tl
 
 becomeifyStmt stmt = case stmt of
-                       Texp "become" [name, types, (Texp "void" []), args] -> [Texp "call-tail" [name, types, Texp "void" [], args], Texp "return" [Texp "void" []]]
+                       Texp "become" [name, types, Texp "void" [], args] -> [Texp "call-tail" [name, types, Texp "void" [], args], Texp "return" [Texp "void" []]]
                        Texp "become" [name, types, return_type, args]      -> [Texp "return" [Texp "call-tail" [name, types, return_type, args], return_type]]
                        _ -> [stmt]
 
@@ -65,15 +65,15 @@ becomeifyStmt stmt = case stmt of
 
 -- prog
 becomeify' (Texp value tls) =
-  Texp value $ (flip map) tls becomeifyTL
+  Texp value $ map becomeifyTL' tls
 
 -- toplevel
 becomeifyTL' tl = case tl of
-                   Texp "def" [a, b, c, (Texp "do" stmts)] -> Texp "def" [a, b, c, (Texp "do" (map becomeifyStmt' stmts))]
+                   Texp "def" [a, b, c, Texp "do" stmts] -> Texp "def" [a, b, c, Texp "do" (map becomeifyStmt' stmts)]
                    _ -> tl
 
 becomeifyStmt' stmt = case stmt of
-                       Texp "become" [name, types, (Texp "void" []), args] -> Texp "do" [Texp "call-tail" [name, types, Texp "void" [], args], Texp "return" [Texp "void" []]]
+                       Texp "become" [name, types, Texp "void" [], args] -> Texp "do" [Texp "call-tail" [name, types, Texp "void" [], args], Texp "return" [Texp "void" []]]
                        Texp "become" [name, types, return_type, args]      -> Texp "return" [Texp "call-tail" [name, types, return_type, args], return_type]
                        _ -> stmt
 
@@ -82,10 +82,10 @@ becomeifyStmt' stmt = case stmt of
 
 -- prog
 flattenDo (Texp value tls) =
-  Texp value $ (flip map) tls flattenDoTL
+  Texp value $ map flattenDoTL tls
 
 flattenDoTL tl = case tl of
-                   Texp "def" [a, b, c, (Texp "do" stmts)] -> Texp "def" [a, b, c, Texp "do" $ concatMap flattenDoStmt stmts]
+                   Texp "def" [a, b, c, Texp "do" stmts] -> Texp "def" [a, b, c, Texp "do" $ concatMap flattenDoStmt stmts]
                    _ -> tl
 
 flattenDoStmt stmt = case stmt of
