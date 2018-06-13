@@ -20,8 +20,18 @@ data Err = Err String deriving (Eq, Show)
 test = do
   -- testBlockify
   -- testUnshow
-  testBecomeify
-  testBecomeify'
+  -- testBecomeify
+  -- testBecomeify'
+  testCallStmt
+
+testCallStmt = do
+  putStrLn "\ntesting callStmt"
+  tests <- listTests "callstmt"
+  results <- forM tests $ \tn -> do
+               putStrLn $ " - testing: " ++ tn
+               tCallStmt tn
+  testCheck results tests
+
 
 testBecomeify' = do
   putStrLn "\ntesting becomeify'"
@@ -45,7 +55,7 @@ testBlockify = do
   results <- forM tests $ \tn -> do
                putStrLn $ " - testing: " ++ tn
                tBlockify tn
-  testCheck results tests  
+  testCheck results tests
 
 testUnshow = do
   putStrLn "\ntesting unshow"
@@ -67,7 +77,7 @@ resultPrint :: Either Err OK -> IO ()
 resultPrint result = do
   case result of
     Left (Err s) -> putStrLn s
-    Right OK -> print "OK"
+    Right OK -> return ()
 
 testCheck :: [Either Err OK] -> [String] -> IO ()
 testCheck results tests = do
@@ -113,6 +123,7 @@ reportEqErr expected result = Err . unlines $  zipConcat (lines ("expected:\n" +
 tBlockify = tPass blockify "blockify"
 tBecomeify = tPass (becomeify . blockify) "become"
 tBecomeify' = tPass (flattenDo . becomeify' . blockify) "become"
+tCallStmt = tPass (callStmt . becomeify . blockify) "callstmt"
                               
 tPass :: (Texp -> Texp) -> String -> String -> IO (Either Err OK)
 tPass f testDir testname = do -- testDir == "blockify", testname == "argcall"

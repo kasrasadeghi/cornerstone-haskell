@@ -14,8 +14,8 @@ The passes go in the following order:
 
 -}
 
-passes = becomeify . blockify
-passes' = flattenDo . becomeify' . blockify
+passes = callStmt . becomeify . blockify
+passes' = callStmt . flattenDo . becomeify' . blockify
 
 --------------------- BLOCKIFY ------------------------
     
@@ -89,6 +89,35 @@ flattenDoTL tl = case tl of
                    _ -> tl
 
 flattenDoStmt stmt = case stmt of
-                       Texp "do" children -> children
+                       Texp "do" children -> concatMap flattenDoStmt children
                        Texp "if" [cond, Texp "do" stmts] -> [Texp "if" [cond, Texp "do" $ concatMap flattenDoStmt stmts]]
                        _ -> [stmt]
+
+--------------------- CALL STMT -----------------------
+
+callStmt (Texp progname tls) =
+  Texp progname $ map callStmtTL tls
+
+callStmtTL tl = case tl of
+                  Texp "def" [a, b, c, (Texp "do" stmts)] -> Texp "def" [a, b, c, Texp "do" $ callStmtBlock stmts]
+                  _ -> tl
+
+callStmtBlock stmts =
+  let
+    nl = nextLocal stmts
+  in undefined
+
+nextLocal stmts = nextLocal' stmts 0
+
+nextLocal' stmts i = undefined
+
+getLets = {- filterTexp -} undefined --TODO implement Foldable/Traversable for Texp
+
+
+callStmtStmt stmt@(Texp value tls) =
+  let let' = Texp "let" [Texp ("$" ++ undefined) [], stmt] in
+    case value of
+      "call" -> let'
+      "call-tail" -> let' 
+      "call-vargs" -> let'
+      _ -> stmt
