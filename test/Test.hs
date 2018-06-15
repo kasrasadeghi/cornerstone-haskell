@@ -20,9 +20,9 @@ data Err = Err String deriving (Eq, Show)
 test = do
   -- testBlockify
   -- testUnshow
-  -- testBecomeify
-  -- testBecomeify'
-  testCallStmt
+  testBecomeify
+  testBecomeify'
+  -- testCallStmt
 
 testCallStmt = do
   putStrLn "\ntesting callStmt"
